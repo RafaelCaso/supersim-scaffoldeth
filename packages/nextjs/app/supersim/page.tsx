@@ -2,7 +2,7 @@
 
 import { NextPage } from "next";
 import { formatEther, parseEther } from "viem";
-import { useAccount, useBalance, useWalletClient } from "wagmi";
+import { useAccount, useBalance, useReadContract, useWalletClient } from "wagmi";
 import { useWriteContract } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
 import { L1Chain, L2ChainA, L2ChainB } from "~~/scaffold.config";
@@ -41,6 +41,26 @@ const Supersim: NextPage = () => {
       name: "mint",
       outputs: [],
       stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      constant: true,
+      inputs: [
+        {
+          internalType: "address",
+          name: "_owner",
+          type: "address",
+        },
+      ],
+      name: "balanceOf",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "balance",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
       type: "function",
     },
   ];
@@ -108,6 +128,14 @@ const Supersim: NextPage = () => {
     chainId: L2ChainB.id,
   });
 
+  const { data: chainAErc20Balance, isLoading: chainAErc20IsLoading } = useReadContract({
+    address: L2NativeSuperchainERC20Address,
+    abi: L2NativeSuperchainERC20ABI,
+    functionName: "balanceOf",
+    args: [connectedAddress],
+    chainId: L2ChainA.id,
+  });
+
   return (
     <>
       <h1>Hello, world!</h1>
@@ -149,6 +177,10 @@ const Supersim: NextPage = () => {
               {l2ChainBBalance?.formatted} {l2ChainBBalance?.symbol}
             </p>
           )}
+        </div>
+        <div>
+          <h2>L2 Chain A Tokens:</h2>
+          {chainAErc20IsLoading ? <p>Loading...</p> : <p>{Number(chainAErc20Balance)}</p>}
         </div>
       </div>
     </>
