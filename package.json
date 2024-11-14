@@ -11,7 +11,7 @@
     "account": "yarn workspace @se-2/foundry account",
     "account:generate": "yarn workspace @se-2/foundry account:generate",
     "account:import": "yarn workspace @se-2/foundry account:import",
-    "chain": "yarn workspace @se-2/foundry chain",
+    "chain": "supersim interop.autorelay",
     "compile": "yarn workspace @se-2/foundry compile",
     "deploy": "yarn workspace @se-2/foundry deploy",
     "deploy:verify": "yarn workspace @se-2/foundry deploy:verify",
@@ -42,5 +42,8 @@
   "packageManager": "yarn@3.2.3",
   "engines": {
     "node": ">=18.18.0"
+  },
+  "dependencies": {
+    "ethers": "^6.13.4"
   }
 }

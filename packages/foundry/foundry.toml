@@ -5,8 +5,8 @@ libs = ['lib']
 fs_permissions = [{ access = "read-write", path = "./"}]
 
 [rpc_endpoints]
-default_network = "http://127.0.0.1:8545"
-localhost = "http://127.0.0.1:8545"
+default_network = { url = "http://127.0.0.1:8545", chain_id = 900}
+localhost = { url = "http://127.0.0.1:8545", chain_id = 900}
 
 mainnet = "https://cloudflare-eth.com"
 sepolia = "https://rpc2.sepolia.org"
