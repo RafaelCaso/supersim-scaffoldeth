@@ -1,10 +1,11 @@
 "use client";
 
 import { NextPage } from "next";
-import { parseEther } from "viem";
-import { useAccount, useWalletClient } from "wagmi";
+import { formatEther, parseEther } from "viem";
+import { useAccount, useBalance, useWalletClient } from "wagmi";
 import { useWriteContract } from "wagmi";
-import { L1Chain } from "~~/scaffold.config";
+import { Address } from "~~/components/scaffold-eth";
+import { L1Chain, L2ChainA, L2ChainB } from "~~/scaffold.config";
 
 const Supersim: NextPage = () => {
   const { data: walletClient } = useWalletClient();
@@ -22,14 +23,38 @@ const Supersim: NextPage = () => {
       type: "function",
     },
   ];
+
+  const L2NativeSuperchainERC20ABI = [
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "_to",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "_amount",
+          type: "uint256",
+        },
+      ],
+      name: "mint",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+  ];
+
   const l1StandardBridgeAddress = L1Chain.contracts.L1StandardBridgeProxy.address;
+
+  const L2NativeSuperchainERC20Address = "0x420beeF000000000000000000000000000000001";
 
   const { address: connectedAddress } = useAccount();
 
   const { writeContract } = useWriteContract();
 
   const handleBridgeETH = async () => {
-    const data = writeContract({
+    const bridgeData = writeContract({
       abi: bridgeETHABI,
       address: l1StandardBridgeAddress,
       functionName: "bridgeETH",
@@ -37,11 +62,10 @@ const Supersim: NextPage = () => {
       value: parseEther("1"),
     });
 
-    console.log(data);
     const tx = {
       from: connectedAddress,
       to: l1StandardBridgeAddress,
-      data: data,
+      data: bridgeData,
       value: parseEther("1").toString(),
     };
     //@ts-ignore
@@ -49,10 +73,84 @@ const Supersim: NextPage = () => {
     console.log(txResponse);
   };
 
+  const handleMintToL2 = async () => {
+    const mintData = writeContract({
+      abi: L2NativeSuperchainERC20ABI,
+      address: L2NativeSuperchainERC20Address,
+      functionName: "mint",
+      args: [connectedAddress, 1000],
+      chainId: L2ChainA.id,
+    });
+
+    const tx = {
+      from: connectedAddress,
+      to: L2NativeSuperchainERC20Address,
+      data: mintData,
+    };
+
+    //@ts-ignore
+    const txResponse = await walletClient?.sendTransaction(tx);
+    console.log(txResponse);
+  };
+
+  const { data: l1Balance, isLoading: l1BalanceIsLoading } = useBalance({
+    address: connectedAddress,
+    chainId: L1Chain.id,
+  });
+
+  const { data: l2ChainABalance, isLoading: l2ChainABalanceIsLoading } = useBalance({
+    address: connectedAddress,
+    chainId: L2ChainA.id,
+  });
+
+  const { data: l2ChainBBalance, isLoading: l2ChainBBalanceIsLoading } = useBalance({
+    address: connectedAddress,
+    chainId: L2ChainB.id,
+  });
+
   return (
     <>
       <h1>Hello, world!</h1>
-      <button onClick={handleBridgeETH}>Send to L2</button>
+      <button className="btn" onClick={handleBridgeETH}>
+        Deposit ETH from the L1 into the L2
+      </button>
+      <button className="btn" onClick={handleMintToL2}>
+        Mint ERC20 on L2 OP Chain A
+      </button>
+      <div>
+        <h1>Account Balances</h1>
+        Connected Address: <Address address={connectedAddress} />
+        <div>
+          <h2>L1 Balance:</h2>
+          {l1BalanceIsLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <p>
+              {l1Balance?.formatted} {l1Balance?.symbol}
+            </p>
+          )}
+        </div>
+        <div>
+          <h2>L2 OP Chain A Balance:</h2>
+          {l2ChainABalanceIsLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <p>
+              {l2ChainABalance?.formatted} {l2ChainABalance?.symbol}
+            </p>
+          )}
+        </div>
+        <div>
+          <h2>L2 OP Chain B Balance:</h2>
+          {l2ChainBBalanceIsLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <p>
+              {l2ChainBBalance?.formatted} {l2ChainBBalance?.symbol}
+            </p>
+          )}
+        </div>
+      </div>
     </>
   );
 };
