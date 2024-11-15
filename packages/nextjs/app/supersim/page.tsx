@@ -8,6 +8,7 @@ import { useAccount, useBalance, useReadContract, useWalletClient } from "wagmi"
 import { useWriteContract } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
 import { L1Chain, L2ChainA, L2ChainB } from "~~/scaffold.config";
+import { notification } from "~~/utils/scaffold-eth";
 
 const Supersim: NextPage = () => {
   const { data: walletClient } = useWalletClient();
@@ -22,6 +23,7 @@ const Supersim: NextPage = () => {
 
   const { writeContract } = useWriteContract();
 
+  // Send 1 ETH from layer 1 to layer 2 Chain A
   const handleBridgeETH = async () => {
     //ABI-encoding for transaction data
     const bridgeData = writeContract({
@@ -40,10 +42,10 @@ const Supersim: NextPage = () => {
       value: parseEther("1").toString(),
     };
     // wallet client sends raw transaction data and handles signing and broadcasting transaction
-    //@ts-ignore
-    const txResponse = await walletClient?.sendTransaction(tx);
+    handleTransaction(tx);
   };
 
+  // Mint 1000 OP Tokens on Layer 2
   const handleMintToL2 = async () => {
     const mintData = writeContract({
       abi: L2NativeSuperchainERC20ABI,
@@ -58,11 +60,10 @@ const Supersim: NextPage = () => {
       to: L2NativeSuperchainERC20Address,
       data: mintData,
     };
-
-    //@ts-ignore
-    const txResponse = await walletClient?.sendTransaction(tx);
+    handleTransaction(tx);
   };
 
+  // Bridge tokens from L2 Chain A to L2 Chain B
   const handleBridgeErc20ToL2 = async () => {
     const bridgeData = writeContract({
       abi: l2Erc20BridgeAbi,
@@ -78,8 +79,17 @@ const Supersim: NextPage = () => {
       data: bridgeData,
     };
 
-    //@ts-ignore
-    const txResponse = await walletClient?.sendTransaction(tx);
+    handleTransaction(tx);
+  };
+
+  const handleTransaction = async (tx: any) => {
+    try {
+      const txResponse = await walletClient?.sendTransaction(tx);
+      notification.success(`Success! Tx Hash: ${txResponse}`);
+    } catch (error) {
+      console.error("Transaction failed: ", error);
+      notification.error(`Something went wrong: ${error}`);
+    }
   };
 
   const { data: l1Balance, isLoading: l1BalanceIsLoading } = useBalance({
