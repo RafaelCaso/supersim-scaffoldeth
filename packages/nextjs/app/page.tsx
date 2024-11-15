@@ -23,8 +23,9 @@ const Home: NextPage = () => {
             <p className="my-2 font-medium">Connected Address:</p>
             <Address address={connectedAddress} />
           </div>
-
-          <Image alt="OP City Logo" src={cityPic} />
+          <div className="flex justify-center">
+            <Image className="size-4/5" alt="OP City Logo" src={cityPic} />
+          </div>
         </div>
 
         <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
