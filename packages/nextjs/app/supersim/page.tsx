@@ -1,8 +1,8 @@
 "use client";
 
-import { EthIcon } from "./_assets/icons";
+import { EthIcon, OPIcon } from "./_assets/icons";
 import { NextPage } from "next";
-import { formatEther, parseEther } from "viem";
+import { parseEther } from "viem";
 import { useAccount, useBalance, useReadContract, useWalletClient } from "wagmi";
 import { useWriteContract } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
@@ -124,7 +124,6 @@ const Supersim: NextPage = () => {
     };
     //@ts-ignore
     const txResponse = await walletClient?.sendTransaction(tx);
-    console.log(txResponse);
   };
 
   const handleMintToL2 = async () => {
@@ -144,7 +143,6 @@ const Supersim: NextPage = () => {
 
     //@ts-ignore
     const txResponse = await walletClient?.sendTransaction(tx);
-    console.log(txResponse);
   };
 
   const handleBridgeErc20ToL2 = async () => {
@@ -164,7 +162,6 @@ const Supersim: NextPage = () => {
 
     //@ts-ignore
     const txResponse = await walletClient?.sendTransaction(tx);
-    console.log(txResponse);
   };
 
   const { data: l1Balance, isLoading: l1BalanceIsLoading } = useBalance({
@@ -199,7 +196,18 @@ const Supersim: NextPage = () => {
   });
   return (
     <>
-      <h1>Hello, world!</h1>
+      <div className="flex items-center flex-col flex-grow pt-10">
+        <div className="px-5">
+          <h1 className="text-center">
+            <span className="block text-2xl mb-2">Welcome to</span>
+            <span className="block text-4xl font-bold">Supersim on Scaffold-ETH 2</span>
+          </h1>
+          <div className="flex justify-center items-center space-x-2 flex-col sm:flex-row">
+            <p className="my-2 font-medium">Connected Address:</p>
+            <Address address={connectedAddress} />
+          </div>
+        </div>
+      </div>
       <button className="btn" onClick={handleBridgeETH}>
         Deposit ETH from the L1 into the L2
       </button>
@@ -217,8 +225,8 @@ const Supersim: NextPage = () => {
           {l1BalanceIsLoading ? (
             <p>Loading...</p>
           ) : (
-            <p>
-              {l1Balance?.formatted} {EthIcon}
+            <p className="flex items-center">
+              {l1Balance?.formatted} <span className="ml-1">{EthIcon}</span>
             </p>
           )}
         </div>
@@ -227,8 +235,8 @@ const Supersim: NextPage = () => {
           {l2ChainABalanceIsLoading ? (
             <p>Loading...</p>
           ) : (
-            <p>
-              {l2ChainABalance?.formatted} {EthIcon}
+            <p className="flex items-center">
+              {l2ChainABalance?.formatted} <span className="ml-1">{EthIcon}</span>
             </p>
           )}
         </div>
@@ -237,18 +245,30 @@ const Supersim: NextPage = () => {
           {l2ChainBBalanceIsLoading ? (
             <p>Loading...</p>
           ) : (
-            <p>
-              {l2ChainBBalance?.formatted} {l2ChainBBalance?.symbol}
+            <p className="flex items-center">
+              {l2ChainBBalance?.formatted} <span className="ml-1">{EthIcon}</span>
             </p>
           )}
         </div>
         <div>
           <h2>L2 Chain A Tokens:</h2>
-          {chainAErc20IsLoading ? <p>Loading...</p> : <p>{Number(chainAErc20Balance)}</p>}
+          {chainAErc20IsLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <p className="flex items-center">
+              {Number(chainAErc20Balance)} <span className="ml-1">{OPIcon}</span>
+            </p>
+          )}
         </div>
         <div>
           <h2>L2 Chain B Tokens:</h2>
-          {chainBErc20IsLoading ? <p>Loading...</p> : <p>{Number(chainBErc20Balance)}</p>}
+          {chainBErc20IsLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <p className="flex items-center">
+              {Number(chainBErc20Balance)} <span className="ml-1">{OPIcon}</span>
+            </p>
+          )}
         </div>
       </div>
     </>
